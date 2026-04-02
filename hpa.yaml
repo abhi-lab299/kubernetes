@@ -1,0 +1,50 @@
+apiVersion: app/v1
+kind: Deployment
+metadata:
+  name: cbz-app
+  labels:
+    app: cbz-app
+spec:
+  replicas: 2
+  selector:
+    matchlabels:
+      app: cbz-app
+  template:
+    metadata:
+      labels:
+        app: cbz-app
+    spec:
+      containers:
+      - name: cbz-app
+        image: nginx
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 80
+
+---
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: cbz-app-hpa
+spec:
+  scalerTargetRef:
+    apiVersion: app/v1
+    kind: Deployment
+    name: cbz-app
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+  - type: Resources
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 50
+        
