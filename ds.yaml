@@ -1,0 +1,39 @@
+apiVersion: app/v1
+kind: DeamonSet
+metadata:
+  name: my-ds
+  labels:
+    app: ds-app
+spec:
+  templates:
+    metadata:
+      labels:
+        app: ds-app
+    spec:
+      containers:
+        - name: my-c
+          image: httpd
+          ports:
+            - containerport: 80
+  selector:
+    # matchlables:
+    #   app: rs-app
+    matchExpressions:
+        - {key: app, operators: In, values: [cbz-app, ds-app]}
+  
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo-svc
+  labels:
+    app: cbz-app
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+  type: NodePort
+  selector:
+    app: ds-app
